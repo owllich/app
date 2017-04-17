@@ -6,7 +6,7 @@ var window = window;
 		window.onmousedown = update;
 		window.onmousemove = update;
 		window.onmouseup = update;
-		window.onresize = update;
+		window.onresize = function (event) { canvas.resize (); update (event); app.draw (1); };
 		window.ontick (update);
 	}
 
@@ -36,6 +36,46 @@ var context = canvas.getContext ('2d');
 
 var app = {
 	create: {
+		box: function (_) {
+			let box = app.create.object (_);
+				box.trace = {};
+				box.z = _.z || 0;
+
+				box.draw = function () {
+					let hwxy = app.get.hwxy (box);
+					if (box.color) { context.fillStyle = box.color; }
+					context.fillRect (hwxy.x, hwxy.y, hwxy.width, hwxy.height);
+				}
+
+				box.move = function (x, y) {
+					box.x = x;
+					box.y = y;
+					app.z (box);
+					box.tracing ();
+				}
+
+				box.tracing = function () {
+					for (let id in app.object) {
+						if (app.object[id].draw) {
+							if (box.trace[id] == 1) {
+								if (!app.get.boxinbox (box, app.object[id])) {
+									app.object[id].redraw = 1;
+									app.z (app.object[id]);
+								}
+							}
+
+							if (app.get.boxinbox (box, app.object[id])) {
+								box.trace[id] = 1;
+							} else {
+								box.trace[id] = 0;
+							}
+						}
+					}
+				}
+
+			return box;
+		},
+
 		object: function (_) {
 			let object = _ || {};
 				object.id = _.id || app.id++;
@@ -97,6 +137,29 @@ var app = {
 			return '' + object.color + object.height + object.redraw + object.text + object.width + object.x + object.y + object.z + src;
 		},
 
+		hwxy: function (object) {
+			let hwxy = {};
+
+				if (object.height) {
+					hwxy.height = app.get.y (object.height);
+				}
+
+				if (object.width) {
+					hwxy.width = app.get.x (object.width);
+				}
+
+				hwxy.height = (hwxy.height) ? hwxy.height : hwxy.width;
+				hwxy.width = (hwxy.width) ? hwxy.width : hwxy.height;
+
+				hwxy.x = object.x || 0;
+				hwxy.x = app.get.x (hwxy.x);
+
+				hwxy.y = object.y || 0;
+				hwxy.y = app.get.y (hwxy.y);
+
+			return hwxy;
+		},
+
 		pointinbox: function (p, b) {
 			return ((p.x > b.x) && (p.x < b.x + b.width) && (p.y > b.y) && (p.y < b.y + b.height));
 		},
@@ -120,6 +183,14 @@ var app = {
 			}
 
 			return Math.random ();
+		},
+
+		x: function (x) {
+			return (x > 0 && x <= 1) ? x * window.innerWidth : x;
+		},
+
+		y: function (y) {
+			return (y > 0 && y <= 1) ? y * window.innerHeight : y;
 		}
 	},
 
@@ -128,6 +199,7 @@ var app = {
 	load: function () {
 		window.load (app.update);
 		canvas.load ();
+		app.draw ();
 	},
 
 	object: {},
@@ -159,3 +231,7 @@ var app = {
 		}
 	}
 }
+
+window.onload = app.load;
+
+app.create.box ({ color: '#f00', height: 100, width: 100, x: 100, y: 100 }).load ();
