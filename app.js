@@ -52,6 +52,7 @@ var app = {
 					box.y = y;
 					app.z (box);
 					box.tracing ();
+					app.draw ();
 				}
 
 				box.tracing = function () {
@@ -85,6 +86,18 @@ var app = {
 				}
 
 			return object;
+		},
+
+		sprite: function (_) {
+			let sprite = app.create.box (_);
+				sprite.aa = _.aa || 0;
+				sprite.i = app.get.i (_.i);
+
+				sprite.draw = function () {
+					let hwxy = app.get.hwxy (sprite);
+					context.imageSmoothingEnabled = sprite.aa;
+					context.drawImage (sprite.i, hwxy.x, hwxy.y, hwxy.width, hwxy.height);
+				}
 		}
 	},
 
@@ -160,6 +173,19 @@ var app = {
 			return hwxy;
 		},
 
+		i: function (i) {
+			let image = (typeof (i) == 'object') ? i : app.i[i];
+			return image;
+		},
+
+		images: function (i) {
+			for (let n of i) {
+				let image = new Image ();
+					image.src = 'data/' + n + '.png';
+				a.i[n] = image;
+			}
+		},
+
 		pointinbox: function (p, b) {
 			return ((p.x > b.x) && (p.x < b.x + b.width) && (p.y > b.y) && (p.y < b.y + b.height));
 		},
@@ -193,6 +219,8 @@ var app = {
 			return (y > 0 && y <= 1) ? y * window.innerHeight : y;
 		}
 	},
+
+	i: {},
 
 	id: 0,
 
