@@ -35,6 +35,8 @@ var canvas = window.document.createElement ('canvas');
 var context = canvas.getContext ('2d');
 
 var app = {
+	a: {},
+
 	create: {
 		box: function (_) {
 			let box = app.create.object (_);
@@ -77,6 +79,47 @@ var app = {
 			return box;
 		},
 
+		button: function (_) {
+			let button = app.create.sprite (_);
+				button.action = _.action || function () {};
+				button.in = _.in || function () {};
+				button.out = _.out || function () {};
+				button.over = 0;
+
+				button.active = function (event) {
+					if (button.over) {
+						if (!app.get.pointinbox ({ x: event.x, y: event.y }, button)) {
+							button.over = 0;
+							canvas.style.cursor = 'default';
+							button.out ();
+						}
+					} else {
+						if (app.get.pointinbox ({ x: event.x, y: event.y }, button)) {
+							button.over = 1;
+							canvas.style.cursor = 'pointer';
+							button.in ();
+						}
+					}
+				}
+
+				button.mousedown = function (event) {
+					if (app.get.pointinbox ({ x: event.x, y: event.y }, button)) {
+						button.action ();
+					}
+				}
+
+				button.mousemove = function (event) {
+					button.active (event);
+				}
+
+				button.mouseup = function (event) {
+					button.over = 0;
+					button.active (event);
+				}
+
+			return button;
+		},
+
 		object: function (_) {
 			let object = _ || {};
 				object.id = _.id || app.id++;
@@ -93,11 +136,33 @@ var app = {
 				sprite.aa = _.aa || 0;
 				sprite.i = app.get.i (_.i);
 
+				sprite.animate = function () {
+					if (typeof (sprite.animation) == 'object') {
+						if (sprite.animation.loop ()) {
+							sprite.animation.step = (sprite.animation.step) ? sprite.animation.step : 0;
+							sprite.animation.tick = (sprite.animation.tick) ? sprite.animation.tick : window.tick;
+							sprite.animation.time = (sprite.animation.time) ? sprite.animation.time : window.time;
+							if (window.time - sprite.animation.time >= sprite.animation.tick) {
+								sprite.animation.time = window.time;
+								sprite.animation.step = (sprite.animation.step >= sprite.animation.a.length - 1) ? 0 : sprite.animation.step + 1;
+								sprite.i = sprite.animation.a[sprite.animation.step];
+								app.draw ();
+							}
+						}
+					}
+				}
+
 				sprite.draw = function () {
 					let hwxy = app.get.hwxy (sprite);
 					context.imageSmoothingEnabled = sprite.aa;
 					context.drawImage (sprite.i, hwxy.x, hwxy.y, hwxy.width, hwxy.height);
 				}
+
+				sprite.tick = function () {
+					sprite.animate ();
+				}
+
+			return sprite;
 		}
 	},
 
@@ -141,6 +206,17 @@ var app = {
 			return { x: x, y: y };
 		},
 
+		animations: function (a) {
+			for (id in a) {
+				app.a[id] = [];
+				for (let i = 0; i < a[id]; i++) {
+					let image = new Image ();
+						image.src = 'data/' + id + ' ' + i + '.png';
+						app.a[id].push (image);
+				}
+			}
+		},
+
 		boxinbox: function (a, b) {
 			return ((Math.abs (a.x - b.x + 0.5 * (a.width - b.width)) < 0.5 * Math.abs (a.width + b.width)) && (Math.abs (a.y - b.y + 0.5 * (a.h - b.h)) < 0.5 * Math.abs (a.h + b.h)));
 		},
@@ -175,6 +251,7 @@ var app = {
 
 		i: function (i) {
 			let image = (typeof (i) == 'object') ? i : app.i[i];
+				image = (image) ? image : new Image ();
 			return image;
 		},
 
@@ -182,7 +259,7 @@ var app = {
 			for (let n of i) {
 				let image = new Image ();
 					image.src = 'data/' + n + '.png';
-				a.i[n] = image;
+				app.i[n] = image;
 			}
 		},
 
@@ -262,4 +339,14 @@ var app = {
 
 window.onload = app.load;
 
+app.get.animations ({ 'color': 8 });
+
+app.get.images (['logo']);
+
 app.create.box ({ color: '#f00', height: 100, width: 100, x: 100, y: 100 }).load ();
+
+app.create.sprite ({ height: 100, i: 'logo', width: 100, x: 300, y: 100 }).load ();
+
+app.create.button ({ action: function () { window.console.log ('ok'); }, height: 100, i: 'logo', width: 100, x: 500, y: 100 }).load ();
+
+app.create.sprite ({ animation: { a: app.a.color, loop: function () { return 1; }, tick: 200 }, height: 100, width: 100, x: 700, y: 100 }).load ();
