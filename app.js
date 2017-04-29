@@ -163,6 +163,49 @@ var app = {
 				}
 
 			return sprite;
+		},
+
+		text: function (_) {
+			let text = app.create.box (_);
+				text.font = _.font || 'Arial';
+				text.size = _.size || 12;
+				text.text = _.text || '';
+
+				text.autosize = function () {
+					if (text.width) {
+						let hwxy = app.get.hwxy (text);
+
+						context.font = text.size + 'px ' + text.font;
+
+						while (Math.abs (hwxy.width - context.measureText (text.text).width) > 1) {
+							if (context.measureText (text.text).width > hwxy.width) {
+								text.size = 0.8 * text.size;
+							} else {
+								text.size = 1.2 * text.size;
+							}
+							context.font = text.size + 'px ' + text.font;
+						}
+					}
+				}
+
+				text.draw = function () {
+					let hwxy = app.get.hwxy (text);
+
+					if (text.color) {
+						context.fillStyle = text.color;
+					}
+
+					context.font = text.size + 'px ' + text.font;
+					context.fillText (text.text, hwxy.x, hwxy.y);
+				}
+
+				text.resize = function () {
+					text.autosize ();
+				}
+
+			text.autosize ();
+
+			return text;
 		}
 	},
 
@@ -350,3 +393,5 @@ app.create.sprite ({ height: 100, i: 'logo', width: 100, x: 300, y: 100 }).load 
 app.create.button ({ action: function () { window.console.log ('ok'); }, height: 100, i: 'logo', width: 100, x: 500, y: 100 }).load ();
 
 app.create.sprite ({ animation: { a: app.a.color, loop: function () { return 1; }, tick: 200 }, height: 100, width: 100, x: 700, y: 100 }).load ();
+
+app.create.text ({ color: '#fff', size: 24, text: 'text', width: 100, x: 400, y: 300 }).load ();
