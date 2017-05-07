@@ -38,6 +38,34 @@ var app = {
 	a: {},
 
 	create: {
+		bar: function (_) {
+			let bar = app.create.box (_);
+				bar.max = _.max || 1;
+				bar.now = _.now || 0;
+				bar.old = undefined;
+
+				bar.draw = function () {
+					let hwxy = app.get.hwxy (bar);
+					let k = bar.now / bar.max;
+					if (bar.color) { context.fillStyle = bar.color; context.strokeStyle = bar.color; }
+					context.fillRect (hwxy.x, hwxy.y, k * hwxy.width, hwxy.height);
+					context.strokeRect (hwxy.x, hwxy.y, hwxy.width, hwxy.height);
+				}
+
+				bar.status = function () {
+					if (bar.now != bar.old) {
+						bar.old = bar.now;
+						bar.draw ();
+					}
+				}
+
+				bar.tick = function () {
+					bar.status ();
+				}
+
+			return bar;
+		},
+
 		box: function (_) {
 			let box = app.create.object (_);
 				box.trace = {};
@@ -385,6 +413,8 @@ window.onload = app.load;
 app.get.animations ({ 'color': 8 });
 
 app.get.images (['logo']);
+
+app.create.bar ({ color: '#00f', height: 10, max: 100, now: 75, width: 500, x: 100, y: 400 }).load ();
 
 app.create.box ({ color: '#f00', height: 100, width: 100, x: 100, y: 100 }).load ();
 
