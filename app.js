@@ -48,8 +48,19 @@ var app = {
 					let hwxy = app.get.hwxy (bar);
 					let k = bar.now / bar.max;
 					if (bar.color) { context.fillStyle = bar.color; context.strokeStyle = bar.color; }
+					context.clearRect (hwxy.x, hwxy.y, hwxy.width, hwxy.height);
 					context.fillRect (hwxy.x, hwxy.y, k * hwxy.width, hwxy.height);
 					context.strokeRect (hwxy.x, hwxy.y, hwxy.width, hwxy.height);
+				}
+
+				bar.add = function (n) {
+					if (bar.now + n < 0) {
+						bar.now = 0;
+					} else if (bar.now + n > bar.max) {
+						bar.now = bar.max;
+					} else {
+						bar.now += n;
+					}
 				}
 
 				bar.status = function () {
@@ -196,6 +207,7 @@ var app = {
 		text: function (_) {
 			let text = app.create.box (_);
 				text.font = _.font || 'Arial';
+				text.max_width = context.measureText (text.text).width;
 				text.size = _.size || 12;
 				text.text = _.text || '';
 
@@ -219,11 +231,18 @@ var app = {
 				text.draw = function () {
 					let hwxy = app.get.hwxy (text);
 
+					text.autosize ();
+
 					if (text.color) {
 						context.fillStyle = text.color;
 					}
 
 					context.font = text.size + 'px ' + text.font;
+
+					text.max_width = (context.measureText (text.text).width > text.max_width) ? context.measureText (text.text).width : text.max_width;
+
+					let width = (text.width) ? text.width : text.max_width;
+					context.clearRect (hwxy.x, hwxy.y - text.size, width, text.size);
 					context.fillText (text.text, hwxy.x, hwxy.y);
 				}
 
@@ -294,7 +313,7 @@ var app = {
 
 		hash: function (object) {
 			let src = (object.i) ? object.i.src : 0;
-			return '' + object.color + object.height + object.redraw + object.text + object.width + object.x + object.y + object.z + src;
+			return '' + object.color + object.height + object.now + object.redraw + object.text + object.width + object.x + object.y + object.z + src;
 		},
 
 		hwxy: function (object) {
@@ -412,16 +431,43 @@ window.onload = app.load;
 
 app.get.animations ({ 'color': 8 });
 
-app.get.images (['logo']);
+app.get.images (['logo', 'minus', 'plus']);
 
-app.create.bar ({ color: '#00f', height: 10, max: 100, now: 75, width: 500, x: 100, y: 400 }).load ();
+let bar = app.create.bar ({ color: '#00f', height: 10, max: 100, now: 75, width: 500, x: 100, y: 400 });
+	bar.load ();
+
+let bar_text = app.create.text ({ color: '#00f', size: 20, text: bar.now + ' / ' + bar.max, x: 100, y: 390 });
+	bar_text.load ();
+
+let minus = app.create.button ({
+	action: function () {
+		bar.add (-7);
+		bar_text.text = bar.now + ' / ' + bar.max;
+		app.draw ();
+	},
+	height: 10,
+	i: 'minus',
+	width: 10,
+	x: 610,
+	y: 400
+}).load ();
+
+let plus = app.create.button ({
+	action: function () {
+		bar.add (3);
+		bar_text.text = bar.now + ' / ' + bar.max;
+		app.draw ();
+	},
+	height: 10,
+	i: 'plus',
+	width: 10,
+	x: 630,
+	y: 400 }).load ();
 
 app.create.box ({ color: '#f00', height: 100, width: 100, x: 100, y: 100 }).load ();
 
 app.create.sprite ({ height: 100, i: 'logo', width: 100, x: 300, y: 100 }).load ();
 
-app.create.button ({ action: function () { window.console.log ('ok'); }, height: 100, i: 'logo', width: 100, x: 500, y: 100 }).load ();
-
 app.create.sprite ({ animation: { a: app.a.color, loop: function () { return 1; }, tick: 200 }, height: 100, width: 100, x: 700, y: 100 }).load ();
 
-app.create.text ({ color: '#fff', size: 24, text: 'text', width: 100, x: 400, y: 300 }).load ();
+app.create.text ({ color: '#fff', size: 24, text: 'text', width: 50, x: 400, y: 300 }).load ();
