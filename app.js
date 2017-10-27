@@ -19,6 +19,7 @@ var window = window;
 			{
 				window.time += window.tick;
 				update ({ type: 'tick' });
+				app.draw ();
 			},
 			window.tick
 		);
@@ -74,8 +75,7 @@ var app =
 					} else if (bar.now + n > bar.max)
 					{
 						bar.now = bar.max;
-					}
-					else
+					} else
 					{
 						bar.now += n;
 					}
@@ -138,8 +138,7 @@ var app =
 							if (app.get.boxinbox (box, app.object[id]))
 							{
 								box.trace[id] = 1;
-							}
-							else
+							} else
 							{
 								box.trace[id] = 0;
 							}
@@ -168,8 +167,7 @@ var app =
 							canvas.style.cursor = 'default';
 							button.out ();
 						}
-					}
-					else
+					} else
 					{
 						if (app.get.pointinbox ({ x: event.x, y: event.y }, button))
 						{
@@ -235,7 +233,7 @@ var app =
 								sprite.animation.time = window.time;
 								sprite.animation.step = (sprite.animation.step >= sprite.animation.a.length - 1) ? 0 : sprite.animation.step + 1;
 								sprite.i = sprite.animation.a[sprite.animation.step];
-								app.draw ();
+								//app.draw ();
 							}
 						}
 					}
@@ -245,6 +243,7 @@ var app =
 				{
 					let hwxy = app.get.hwxy (sprite);
 					context.imageSmoothingEnabled = sprite.aa;
+					context.clearRect (hwxy.x, hwxy.y, hwxy.width, hwxy.height);
 					context.drawImage (sprite.i, hwxy.x, hwxy.y, hwxy.width, hwxy.height);
 				}
 
@@ -277,8 +276,7 @@ var app =
 							if (context.measureText (text.text).width > hwxy.width)
 							{
 								text.size = 0.8 * text.size;
-							}
-							else
+							} else
 							{
 								text.size = 1.2 * text.size;
 							}
@@ -351,7 +349,8 @@ var app =
 		}
 	},
 
-	get: {
+	get:
+	{
 		ab: function (a, b)
 		{
 			return Math.sqrt (Math.pow (a.x - b.x, 2) + Math.pow (a.y - b.y, 2));
@@ -368,7 +367,8 @@ var app =
 
 		animations: function (a)
 		{
-			for (id in a) {
+			for (id in a)
+			{
 				app.a[id] = [];
 				for (let i = 0; i < a[id]; i++)
 				{
@@ -488,7 +488,8 @@ var app =
 
 	object: {},
 
-	scene: {
+	scene:
+	{
 		load: function () {}
 	},
 
@@ -530,90 +531,3 @@ var app =
 }
 
 window.onload = app.load;
-
-//LOAD RESOURCES
-app.get.animations ({ 'color': 8 });
-
-app.get.images (['back', 'forward', 'logo', 'minus', 'plus']);
-
-//CREATE OBJECTS
-app.scene.load = function () { app.scene.test (); }
-
-app.scene.test = function ()
-{
-	app.wipe ();
-
-	let bar = app.create.bar ({ color: '#00f', height: 10, max: 100, now: 75, width: 500, x: 100, y: 400 });
-		bar.load ();
-
-	let bar_text = app.create.text ({ color: '#00f', size: 20, text: bar.now + ' / ' + bar.max, x: 100, y: 390 });
-		bar_text.load ();
-
-	let minus = app.create.button
-	({
-		action: function () {
-			bar.add (-7);
-			bar_text.text = bar.now + ' / ' + bar.max;
-			app.draw ();
-		},
-		height: 10,
-		i: 'minus',
-		width: 10,
-		x: 610,
-		y: 400
-	}).load ();
-
-	let plus = app.create.button
-	({
-		action: function () {
-			bar.add (3);
-			bar_text.text = bar.now + ' / ' + bar.max;
-			app.draw ();
-		},
-		height: 10,
-		i: 'plus',
-		width: 10,
-		x: 630,
-		y: 400 }).load ();
-
-	app.create.box ({ color: '#f00', height: 100, width: 100, x: 100, y: 100 }).load ();
-
-	app.create.button
-	({
-		action: function () {
-			app.scene.test2 ();
-		},
-		height: 60,
-		i: 'forward',
-		width: 60,
-		x: 0.6 * window.innerWidth,
-		y: 0.5 * window.innerHeight
-	}).load ();
-
-	app.create.sprite ({ height: 100, i: 'logo', width: 100, x: 300, y: 100 }).load ();
-
-	app.create.sprite ({ animation: { a: app.a.color, loop: function () { return 1; }, tick: 200 }, height: 100, width: 100, x: 700, y: 100 }).load ();
-
-	app.create.text ({ color: '#fff', size: 24, text: 'text', width: 50, x: 400, y: 300 }).load ();
-
-	app.draw ();
-}
-
-app.scene.test2 = function ()
-{
-	app.wipe ();
-
-	app.create.button
-	({
-		action: function () {
-			app.scene.test ();
-		},
-		height: 60,
-		i: 'back',
-		width: 60,
-		x: 0.6 * window.innerWidth,
-		y: 0.5 * window.innerHeight
-	}).load ();
-
-	app.draw ();
-}
