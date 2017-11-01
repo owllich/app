@@ -228,12 +228,12 @@ var app =
 							sprite.animation.step = (sprite.animation.step) ? sprite.animation.step : 0;
 							sprite.animation.tick = (sprite.animation.tick) ? sprite.animation.tick : window.tick;
 							sprite.animation.time = (sprite.animation.time) ? sprite.animation.time : window.time;
+							sprite.i = sprite.animation.a[sprite.animation.step];
 							if (window.time - sprite.animation.time >= sprite.animation.tick)
 							{
 								sprite.animation.time = window.time;
 								sprite.animation.step = (sprite.animation.step >= sprite.animation.a.length - 1) ? 0 : sprite.animation.step + 1;
 								sprite.i = sprite.animation.a[sprite.animation.step];
-								//app.draw ();
 							}
 						}
 					}
@@ -243,7 +243,6 @@ var app =
 				{
 					let hwxy = app.get.hwxy (sprite);
 					context.imageSmoothingEnabled = sprite.aa;
-					context.clearRect (hwxy.x, hwxy.y, hwxy.width, hwxy.height);
 					context.drawImage (sprite.i, hwxy.x, hwxy.y, hwxy.width, hwxy.height);
 				}
 
@@ -338,13 +337,7 @@ var app =
 				if (app.drawed == undefined) { app.drawed = {}; }
 				if (app.drawed[z] == undefined) { app.drawed[z] = {}; }
 				if (app.drawed[z][id] == undefined) { app.drawed[z][id] = {}; }
-
-				if (app.get.hash (drawed[z][id]) != app.drawed[z][id])
-				{
-					drawed[z][id].redraw = 0;
-					drawed[z][id].draw ();
-					app.drawed[z][id] = app.get.hash (drawed[z][id]);
-				}
+				drawed[z][id].draw ();
 			}
 		}
 	},
