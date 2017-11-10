@@ -101,8 +101,14 @@ var app =
 		box: function (_)
 		{
 			let box = app.create.object (_);
+				box.redraw = _.redraw || 1;
 				box.trace = {};
 				box.z = _.z || 0;
+
+				box.clear = function () {
+					let hwxy = app.get.hwxy (box);
+					context.clearRect (hwxy.x, hwxy.y, hwxy.width, hwxy.height);
+				}
 
 				box.draw = function ()
 				{
@@ -113,6 +119,7 @@ var app =
 
 				box.move = function (x, y)
 				{
+					box.redraw = 1;
 					box.x = x;
 					box.y = y;
 					app.z (box);
@@ -229,11 +236,14 @@ var app =
 							sprite.animation.tick = (sprite.animation.tick) ? sprite.animation.tick : window.tick;
 							sprite.animation.time = (sprite.animation.time) ? sprite.animation.time : window.time;
 							sprite.i = sprite.animation.a[sprite.animation.step];
+							sprite.redraw = 1;
 							if (window.time - sprite.animation.time >= sprite.animation.tick)
 							{
 								sprite.animation.time = window.time;
 								sprite.animation.step = (sprite.animation.step >= sprite.animation.a.length - 1) ? 0 : sprite.animation.step + 1;
 								sprite.i = sprite.animation.a[sprite.animation.step];
+								sprite.clear ();
+								sprite.redraw = 1;
 							}
 						}
 					}
@@ -317,27 +327,30 @@ var app =
 
 	draw: function (redraw)
 	{
-		let drawed = {};
-
-		if (redraw == 1) { delete app.drawed; }
+		let drawed = { length: -1 }
 
 		for (let id in app.object)
 		{
 			if (app.object[id].z != undefined)
 			{
-				if (drawed[app.object[id].z] == undefined) { drawed[app.object[id].z] = {}; }
+				if (drawed[app.object[id].z] == undefined)
+				{
+					drawed[app.object[id].z] = {};
+					drawed.length++;
+				}
 				drawed[app.object[id].z][id] = app.object[id];
 			}
 		}
 
-		for (let z in drawed)
+		for (let z = 0; z <= drawed.length; z++)
 		{
 			for (let id in drawed[z])
 			{
-				if (app.drawed == undefined) { app.drawed = {}; }
-				if (app.drawed[z] == undefined) { app.drawed[z] = {}; }
-				if (app.drawed[z][id] == undefined) { app.drawed[z][id] = {}; }
-				drawed[z][id].draw ();
+				if (drawed[z][id].redraw || redraw)
+				{
+					drawed[z][id].redraw = 0;
+					drawed[z][id].draw ();
+				}
 			}
 		}
 	},

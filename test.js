@@ -41,7 +41,8 @@ app.scene.test = function ()
 		y: 400
 	}).load ();
 
-	app.create.box ({ color: '#f00', height: 100, width: 100, x: 100, y: 100 }).load ();
+	app.create.box ({ color: '#f00', height: 100, width: 100, x: 100, y: 100, z: 1 }).load ();
+	app.create.box ({ color: '#ff0', height: 100, width: 100, x: 150, y: 150, z: 0 }).load ();
 
 	app.create.button
 	({
