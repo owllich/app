@@ -114,12 +114,14 @@ var app =
 				{
 					let hwxy = app.get.hwxy (box);
 					if (box.color) { context.fillStyle = box.color; }
+										box.clear ();
 					context.fillRect (hwxy.x, hwxy.y, hwxy.width, hwxy.height);
 				}
 
 				box.move = function (x, y)
 				{
 					box.redraw = 1;
+					app.draw ();
 					box.x = x;
 					box.y = y;
 					app.z (box);
@@ -207,10 +209,38 @@ var app =
 			return button;
 		},
 
+		cycle: function (_) {
+			let cycle = app.create.object (_);
+				cycle.action = _.action || function () {};
+				cycle.ok = _.ok || 1;
+				cycle.period = _.period || window.period;
+				cycle.time = _.time || window.time;
+
+				cycle.run = function ()
+				{
+					if (cycle.ok)
+					{
+						if (window.time - cycle.time >= cycle.period)
+						{
+							cycle.time = window.time;
+							cycle.action ();
+						}
+					}
+				}
+
+				cycle.tick = function ()
+				{
+					cycle.run ();
+				}
+
+			return cycle;
+		},
+
 		object: function (_)
 		{
 			let object = _ || {};
 				object.id = _.id || app.id++;
+				object.tag = _.tag || [];
 
 				object.load = function ()
 				{
@@ -390,6 +420,16 @@ var app =
 			return ((Math.abs (a.x - b.x + 0.5 * (a.width - b.width)) < 0.5 * Math.abs (a.width + b.width)) && (Math.abs (a.y - b.y + 0.5 * (a.h - b.h)) < 0.5 * Math.abs (a.h + b.h)));
 		},
 
+		count: function (property, value)
+		{
+			let count = 0;
+			for (let id in app.object)
+			{
+				if (app.object[id][property] == value) { count++; }
+			}
+			return count;
+		},
+
 		hash: function (object)
 		{
 			let src = (object.i) ? object.i.src : 0;
@@ -437,6 +477,16 @@ var app =
 					image.src = 'data/' + n + '.png';
 				app.i[n] = image;
 			}
+		},
+
+		objects: function (property, value)
+		{
+			let objects = {};
+			for (let id in app.object)
+			{
+				if (app.object[id][property] == value) { objects[id] = app.object[id]; }
+			}
+			return objects;
 		},
 
 		pointinbox: function (p, b)
