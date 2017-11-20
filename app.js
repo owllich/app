@@ -105,16 +105,10 @@ var app =
 				box.trace = {};
 				box.z = _.z || 0;
 
-				box.clear = function () {
-					let hwxy = app.get.hwxy (box);
-					context.clearRect (hwxy.x, hwxy.y, hwxy.width, hwxy.height);
-				}
-
 				box.draw = function ()
 				{
 					let hwxy = app.get.hwxy (box);
 					if (box.color) { context.fillStyle = box.color; }
-										box.clear ();
 					context.fillRect (hwxy.x, hwxy.y, hwxy.width, hwxy.height);
 				}
 
@@ -124,7 +118,7 @@ var app =
 					app.draw ();
 					box.x = x;
 					box.y = y;
-					app.z (box);
+					app.zen (box);
 					box.tracing ();
 					app.draw ();
 				}
@@ -265,15 +259,13 @@ var app =
 							sprite.animation.step = (sprite.animation.step) ? sprite.animation.step : 0;
 							sprite.animation.tick = (sprite.animation.tick) ? sprite.animation.tick : window.tick;
 							sprite.animation.time = (sprite.animation.time) ? sprite.animation.time : window.time;
-							sprite.i = sprite.animation.a[sprite.animation.step];
-							sprite.redraw = 1;
 							if (window.time - sprite.animation.time >= sprite.animation.tick)
 							{
 								sprite.animation.time = window.time;
 								sprite.animation.step = (sprite.animation.step >= sprite.animation.a.length - 1) ? 0 : sprite.animation.step + 1;
 								sprite.i = sprite.animation.a[sprite.animation.step];
-								sprite.clear ();
 								sprite.redraw = 1;
+								app.zen (sprite);
 							}
 						}
 					}
@@ -349,6 +341,12 @@ var app =
 					text.autosize ();
 				}
 
+				text.write = function (value)
+				{
+					text.text = value;
+					text.redraw = 1;
+				}
+
 			text.autosize ();
 
 			return text;
@@ -357,29 +355,17 @@ var app =
 
 	draw: function (redraw)
 	{
-		let drawed = { length: -1 }
-
-		for (let id in app.object)
+		for (let z = 0; z <= app.z; z++)
 		{
-			if (app.object[id].z != undefined)
+			for (let id in app.object)
 			{
-				if (drawed[app.object[id].z] == undefined)
+				if (app.object[id].z == z)
 				{
-					drawed[app.object[id].z] = {};
-					drawed.length++;
-				}
-				drawed[app.object[id].z][id] = app.object[id];
-			}
-		}
-
-		for (let z = 0; z <= drawed.length; z++)
-		{
-			for (let id in drawed[z])
-			{
-				if (drawed[z][id].redraw || redraw)
-				{
-					drawed[z][id].redraw = 0;
-					drawed[z][id].draw ();
+					if (app.object[id].redraw || redraw)
+					{
+						app.object[id].redraw = 0;
+						app.object[id].draw ();
+					}
 				}
 			}
 		}
@@ -417,7 +403,7 @@ var app =
 
 		boxinbox: function (a, b)
 		{
-			return ((Math.abs (a.x - b.x + 0.5 * (a.width - b.width)) < 0.5 * Math.abs (a.width + b.width)) && (Math.abs (a.y - b.y + 0.5 * (a.h - b.h)) < 0.5 * Math.abs (a.h + b.h)));
+			return ((Math.abs (a.x - b.x + 0.5 * (a.width - b.width)) < 0.5 * Math.abs (a.width + b.width)) && (Math.abs (a.y - b.y + 0.5 * (a.height - b.height)) < 0.5 * Math.abs (a.height + b.height)));
 		},
 
 		count: function (property, value)
@@ -567,19 +553,17 @@ var app =
 		context.clearRect (0, 0, canvas.width, canvas.height);
 	},
 
-	z: function (object)
+	z: 0,
+
+	zen: function (object)
 	{
 		for (let id in app.object)
 		{
-			if (id != object.id)
+			if (app.object[id].z > object.z)
 			{
 				if (app.get.boxinbox (object, app.object[id]))
 				{
-					if (!app.object[id].redraw)
-					{
-						app.object[id].redraw = 1;
-						app.z (app.object[id]);
-					}
+					app.object[id].redraw = 1;
 				}
 			}
 		}

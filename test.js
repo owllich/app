@@ -4,6 +4,7 @@ app.scene.load = function () { app.scene.test (); }
 app.scene.test = function ()
 {
 	app.wipe ();
+	app.z = 1;
 
 	let bar = app.create.bar ({ color: '#00f', height: 10, max: 100, now: 75, width: 500, x: 100, y: 400 }); bar.load ();
 
@@ -14,7 +15,7 @@ app.scene.test = function ()
 		action: function ()
 		{
 			bar.add (-7);
-			bar_text.text = bar.now + ' / ' + bar.max;
+			bar_text.write (bar.now + ' / ' + bar.max);
 			app.draw ();
 		},
 		height: 10,
@@ -29,7 +30,7 @@ app.scene.test = function ()
 		action: function ()
 		{
 			bar.add (3);
-			bar_text.text = bar.now + ' / ' + bar.max;
+			bar_text.write (bar.now + ' / ' + bar.max);
 			app.draw ();
 		},
 		height: 10,
@@ -40,7 +41,7 @@ app.scene.test = function ()
 	}).load ();
 
 	app.create.box ({ color: '#f00', height: 100, width: 100, x: 100, y: 100, z: 1 }).load ();
-	app.create.box ({ color: '#ff0', height: 100, width: 100, x: 150, y: 150, z: 0 }).load ();
+	app.create.box ({ color: '#ff0', height: 100, width: 100, x: 150, y: 150 }).load ();
 
 	app.create.button
 	({
@@ -52,7 +53,8 @@ app.scene.test = function ()
 		i: 'forward',
 		width: 60,
 		x: 0.6 * window.innerWidth,
-		y: 0.5 * window.innerHeight
+		y: 0.5 * window.innerHeight,
+		z: 1
 	}).load ();
 
 	app.create.sprite ({ height: 100, i: 'logo', width: 100, x: 300, y: 100 }).load ();
@@ -67,6 +69,7 @@ app.scene.test = function ()
 app.scene.test2 = function ()
 {
 	app.wipe ();
+	app.z = 2;
 
 	app.create.button
 	({
@@ -79,17 +82,16 @@ app.scene.test2 = function ()
 		width: 60,
 		x: 0.6 * window.innerWidth,
 		y: 0.5 * window.innerHeight,
-		z: 1
+		z: 2
 	}).load ();
 
 	let black = app.create.sprite
 	({
 		height: window.innerHeight,
-		i: 'black',
-		redraw: 1,
+		i: 'grey',
 		width: window.innerWidth,
 		x: 0,
-		y: 0
+		y: 0,
 	}); black.load ();
 
 	for (let i = 0; i < 100; i++)
@@ -104,9 +106,11 @@ app.scene.test2 = function ()
 				tick: app.get.random (100, 500, 1)
 			},
 			height: 6,
+			i: app.a.grass[0],
 			width: 9,
 			x: app.get.random () * window.innerWidth,
-			y: app.get.random () * window.innerHeight
+			y: app.get.random () * window.innerHeight,
+			z: 1
 		}).load ();
 	}
 

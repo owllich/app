@@ -11,6 +11,7 @@ app.get.images
 	'black',
 	'forward',
 	'grass',
+	'grey',
 	'logo',
 	'minus',
 	'plus'
