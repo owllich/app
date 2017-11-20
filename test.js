@@ -85,16 +85,25 @@ app.scene.test2 = function ()
 		z: 2
 	}).load ();
 
-	let black = app.create.sprite
-	({
-		height: window.innerHeight,
-		i: 'grey',
-		width: window.innerWidth,
-		x: 0,
-		y: 0,
-	}); black.load ();
+	let kx = 0.2;
+	let ky = 0.2;
 
-	for (let i = 0; i < 100; i++)
+	for (let x = 0; x < 1; x += kx)
+	{
+		for (let y = 0; y < 1; y += ky)
+		{
+			app.create.box
+			({
+				color: '#000',
+				height: ky * window.innerHeight,
+				width: kx * window.innerWidth,
+				x: x * window.innerWidth,
+				y: y * window.innerHeight,
+			}).load ();			
+		}		
+	}
+
+	for (let i = 0; i < 10; i++)
 	{
 		app.create.sprite
 		({

@@ -559,11 +559,12 @@ var app =
 	{
 		for (let id in app.object)
 		{
-			if (app.object[id].z > object.z)
+			if ((app.object[id].redraw != 1) && (app.object[id].z != object.z))
 			{
 				if (app.get.boxinbox (object, app.object[id]))
 				{
 					app.object[id].redraw = 1;
+					app.zen (app.object[id]);
 				}
 			}
 		}
