@@ -129,20 +129,38 @@ app.scene.test2 = function ()
 app.scene.gold_snow = function ()
 {
 	app.wipe ();
+	app.z = 1;
 
-	let boxes = 100;
+	let kx = 0.1;
+	let ky = 0.1;
+
+	for (let x = 0; x < 1; x += kx)
+	{
+		for (let y = 0; y < 1; y += ky)
+		{
+			app.create.box
+			({
+				color: '#000',
+				height: ky * window.innerHeight,
+				width: kx * window.innerWidth,
+				x: x * window.innerWidth,
+				y: y * window.innerHeight,
+			}).load ();			
+		}		
+	}
+
+	let boxes = 10;
 
 	let cycle = app.create.cycle
 	({
 		action: function ()
 		{
-			let create = (app.get.random () < 0.5) ? 1 : 0;
+			let create = (app.get.random () < 0.1) ? 1 : 0;
 
-			if ((create) && (app.get.count ('name', 'snowflake') < boxes))
+			if ((create) && (50 > boxes))
 			{
-				let x0 = 0;
 				let y0 = app.get.random () * window.innerHeight;
-				app.create.box ({ color: '#ff0', height: 10, name: 'snowflake', width: 10, x: x0, y: y0 }).load ();
+				app.create.box ({ color: '#fff', height: 10, name: 'snowflake', width: 10, x: 0, y: y0, z: 1 }).load ();
 				boxes++;
 			}
 
@@ -154,9 +172,9 @@ app.scene.gold_snow = function ()
 				let speed = app.get.random (0, 0.5) * 0.01 * window.innerWidth;
 				let bright = 200 + Math.sin (snowflakes[id].x) * 56;
 
-				snowflakes[id].color = 'rgb(' + bright + ', ' + bright + ', 0)';
+				//snowflakes[id].color = 'rgb(' + bright + ', ' + bright + ', 0)';
 
-				snowflakes[id].color = app.get.random ('color');
+				//snowflakes[id].color = ;
 
 				if (snowflakes[id].x + speed + snowflakes[id].width <= window.innerWidth)
 				{
@@ -164,6 +182,7 @@ app.scene.gold_snow = function ()
 				}
 				else
 				{
+					boxes--;
 					delete app.object[id];
 				}
 
@@ -173,6 +192,7 @@ app.scene.gold_snow = function ()
 				}
 				else
 				{
+					boxes--;
 					delete app.object[id];
 				}
 
