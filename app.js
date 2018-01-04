@@ -135,7 +135,7 @@ var app =
 								if (!app.get.boxinbox (box, app.object[id]))
 								{
 									app.object[id].redraw = 1;
-									app.zen (app.object[id]);
+									//app.zen (app.object[id]);
 								}
 							}
 
